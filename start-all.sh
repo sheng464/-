@@ -16,7 +16,15 @@ mkdir -p "$DATA_DIR/minio"
 echo "Data directory: $DATA_DIR"
 echo ""
 
-echo "[1/9] Checking Docker..."
+echo "[1/10] Checking Python dependencies..."
+python3 -m pip install -r "$SCRIPT_DIR/requirements.txt" --quiet 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "[WARNING] Some Python packages may not be installed correctly"
+fi
+echo "[OK] Python dependencies ready"
+
+echo ""
+echo "[2/10] Checking Docker..."
 if ! command -v docker &> /dev/null; then
     echo "[ERROR] Docker is not installed"
     exit 1
@@ -29,13 +37,13 @@ fi
 echo "[OK] Docker is running"
 
 echo ""
-echo "[2/9] Cleaning up old containers..."
+echo "[3/10] Cleaning up old containers..."
 docker stop interview_mysql interview_redis interview_chroma interview_minio 2>/dev/null
 docker rm interview_mysql interview_redis interview_chroma interview_minio 2>/dev/null
 echo "[OK] Old containers removed"
 
 echo ""
-echo "[3/9] Starting MySQL on port 3307..."
+echo "[4/10] Starting MySQL on port 3307..."
 docker run -d --name interview_mysql \
   -p 3307:3306 \
   -e MYSQL_ROOT_PASSWORD=1234 \
@@ -55,7 +63,7 @@ echo "[OK] Redis started on port 6380 (password: 12345)"
 echo "    Data: $DATA_DIR/redis"
 
 echo ""
-echo "[5/9] Starting Chroma on port 8000..."
+echo "[6/10] Starting Chroma on port 8000..."
 docker run -d --name interview_chroma \
   -p 8000:8000 \
   -v "$DATA_DIR/chroma:/chroma/chroma" \
@@ -80,12 +88,12 @@ sleep 15
 echo "[OK] Docker services are ready"
 
 echo ""
-echo "[8/9] Starting Ollama..."
+echo "[9/10] Starting Ollama..."
 nohup ollama serve > /dev/null 2>&1 &
 echo "[OK] Ollama starting on port 11434..."
 
 echo ""
-echo "[9/9] Starting Whisper..."
+echo "[10/10] Starting Whisper..."
 nohup python3 whisper_server.py > whisper.log 2>&1 &
 echo "[OK] Whisper starting on port 5000..."
 

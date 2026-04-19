@@ -17,9 +17,18 @@ if not exist "%DATA_DIR%\minio" mkdir "%DATA_DIR%\minio"
 echo Data directory: %DATA_DIR%
 echo.
 
-echo [1/9] Checking Docker...
+echo [1/10] Checking Python dependencies...
+python -m pip install -r "%SCRIPT_DIR%requirements.txt" --quiet
+if errorlevel 1 (
+    echo [WARNING] Some Python packages may not be installed correctly
+) else (
+    echo [OK] Python dependencies ready
+)
+
+echo.
+echo [2/10] Checking Docker...
 docker info >nul 2>&1
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo [ERROR] Docker is not running. Please start Docker Desktop first.
     pause
     exit /b 1
@@ -27,7 +36,7 @@ if %errorlevel% neq 0 (
 echo [OK] Docker is running
 
 echo.
-echo [2/9] Cleaning up old processes and containers...
+echo [3/10] Cleaning up old processes and containers...
 taskkill /F /IM java.exe 2>nul
 taskkill /F /IM node.exe 2>nul
 taskkill /F /IM python.exe 2>nul
@@ -36,57 +45,73 @@ docker rm interview_mysql interview_redis interview_chroma interview_minio 2>nul
 echo [OK] Old processes and containers removed
 
 echo.
-echo [3/9] Starting MySQL on port 3307...
+echo [4/10] Starting MySQL on port 3307...
 docker run -d --name interview_mysql ^
   -p 3307:3306 ^
   -e MYSQL_ROOT_PASSWORD=1234 ^
   -e MYSQL_DATABASE=ai_interview ^
   -v "%DATA_DIR%\mysql:/var/lib/mysql" ^
   mysql:8.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-echo [OK] MySQL started on port 3307 (password: 1234)
-echo     Data: %DATA_DIR%\mysql
+if errorlevel 1 (
+    echo [ERROR] Failed to start MySQL
+) else (
+    echo [OK] MySQL started on port 3307 (password: 1234)
+    echo     Data: %DATA_DIR%\mysql
+)
 
 echo.
-echo [4/9] Starting Redis on port 6380...
+echo [5/10] Starting Redis on port 6380...
 docker run -d --name interview_redis ^
   -p 6380:6379 ^
   -v "%DATA_DIR%\redis:/data" ^
   redis:7-alpine redis-server --requirepass 12345
-echo [OK] Redis started on port 6380 (password: 12345)
-echo     Data: %DATA_DIR%\redis
+if errorlevel 1 (
+    echo [ERROR] Failed to start Redis
+) else (
+    echo [OK] Redis started on port 6380 (password: 12345)
+    echo     Data: %DATA_DIR%\redis
+)
 
 echo.
-echo [5/9] Starting Chroma on port 8000...
+echo [6/10] Starting Chroma on port 8000...
 docker run -d --name interview_chroma ^
   -p 8000:8000 ^
   -v "%DATA_DIR%\chroma:/chroma/chroma" ^
   chromadb/chroma
-echo [OK] Chroma started on port 8000
-echo     Data: %DATA_DIR%\chroma
+if errorlevel 1 (
+    echo [ERROR] Failed to start Chroma
+) else (
+    echo [OK] Chroma started on port 8000
+    echo     Data: %DATA_DIR%\chroma
+)
 
 echo.
-echo [6/9] Starting MinIO on port 9000...
+echo [7/10] Starting MinIO on port 9000...
 docker run -d --name interview_minio ^
   -p 9000:9000 -p 9001:9001 ^
   -e MINIO_ROOT_USER=minioadmin ^
   -e MINIO_ROOT_PASSWORD=minioadmin ^
   -v "%DATA_DIR%\minio:/data" ^
   minio/minio server /data --console-address ":9001"
-echo [OK] MinIO started on port 9000, Console on 9001
-echo     Data: %DATA_DIR%\minio
+if errorlevel 1 (
+    echo [ERROR] Failed to start MinIO. Port 9000 may be in use.
+) else (
+    echo [OK] MinIO started on port 9000, Console on 9001
+    echo     Data: %DATA_DIR%\minio
+)
 
 echo.
-echo [7/9] Waiting for Docker services...
+echo [8/10] Waiting for Docker services...
 timeout /t 15 /nobreak >nul
 echo [OK] Docker services are ready
 
 echo.
-echo [8/9] Starting Ollama...
+echo [9/10] Starting Ollama...
 start "Ollama" cmd /k "ollama serve"
 echo [OK] Ollama starting on port 11434...
 
 echo.
-echo [9/9] Starting Whisper...
+echo [10/10] Starting Whisper...
 start "Whisper" cmd /k "cd /d %~dp0 && python whisper_server.py"
 echo [OK] Whisper starting on port 5000...
 
