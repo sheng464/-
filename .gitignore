@@ -1,0 +1,59 @@
+# Dependencies
+.venv/
+node_modules/
+*/node_modules/
+
+# Build outputs
+backend/target/
+frontend/dist/
+front/dist/
+
+# IDE
+.idea/
+.vscode/
+.trae/
+
+# Logs
+*.log
+logs/
+
+# Environment files (contain secrets)
+.env
+.env.local
+*.env
+
+# Docker data (should not be committed)
+docker-data/
+minio-data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Maven wrapper (can be regenerated)
+.mvn/wrapper/maven-wrapper.jar
+
+# Test files
+test_*.py
+test_*.wav
+test_*.webm
+
+# Large documents
+*.docx
+*.pdf
+
+# Windows executables
+*.exe
+minio.exe

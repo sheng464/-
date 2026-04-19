@@ -1,0 +1,58 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3307/ai_interview?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: "1234"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  redis:
+    host: localhost
+    port: 6380
+    password: "12345"
+    database: 0
+    timeout: 5000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+      shutdown-timeout: 100ms
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: llama3.1:8b
+
+jwt:
+  secret: this-is-a-very-long-secret-key-for-jwt-token-generation-purposes-123456
+  expiration: 36000000
+
+minio:
+  endpoint: http://127.0.0.1:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucketName: resumes
+  urlExpiration: 3600
+
+interview:
+  tech:
+    maxQuestions: 2
+    maxFollowups: 0
+  project:
+    maxQuestions: 2
+    maxFollowups: 1
+
+chroma:
+  host: localhost
+  port: 8000
+
+ollama:
+  base-url: http://localhost:11434
+  embedding-model: nomic-embed-text
+
+rag:
+  similarity-threshold: 299
